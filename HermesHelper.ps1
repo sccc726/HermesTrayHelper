@@ -6,6 +6,7 @@ $ErrorActionPreference = "Stop"
 
 $script:WslDistro = "Ubuntu"
 $script:ActionsPath = Join-Path $PSScriptRoot "actions.json"
+$script:TrayIconPath = Join-Path $PSScriptRoot "HermesTrayHelper.ico"
 
 function ConvertTo-PowerShellSingleQuotedLiteral {
     param([AllowNull()][string]$Value)
@@ -1050,6 +1051,14 @@ function New-GatewayMenuItem {
     return $gatewayItem
 }
 
+function Get-HermesTrayIcon {
+    if (Test-Path -LiteralPath $script:TrayIconPath) {
+        return New-Object System.Drawing.Icon -ArgumentList $script:TrayIconPath
+    }
+
+    return [System.Drawing.SystemIcons]::Application
+}
+
 function Initialize-HermesTray {
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
@@ -1064,11 +1073,11 @@ function Initialize-HermesTray {
     $notifyIcon.Visible = $true
 
     if ($health.State -eq "Ok") {
-        $notifyIcon.Icon = [System.Drawing.SystemIcons]::Application
+        $notifyIcon.Icon = Get-HermesTrayIcon
         $balloonIcon = [System.Windows.Forms.ToolTipIcon]::Info
     }
     else {
-        $notifyIcon.Icon = [System.Drawing.SystemIcons]::Warning
+        $notifyIcon.Icon = Get-HermesTrayIcon
         $balloonIcon = [System.Windows.Forms.ToolTipIcon]::Warning
     }
 
