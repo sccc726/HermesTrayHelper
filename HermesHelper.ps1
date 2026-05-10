@@ -8,6 +8,54 @@ $script:WslDistro = "Ubuntu"
 $script:ActionsPath = Join-Path $PSScriptRoot "actions.json"
 $script:TrayIconPath = Join-Path $PSScriptRoot "HermesTrayHelper.ico"
 
+function Enable-HermesDpiAwareness {
+    $typeName = "HermesHelper.NativeDpi"
+    if ($null -eq ([System.Management.Automation.PSTypeName]$typeName).Type) {
+        Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+namespace HermesHelper
+{
+    public static class NativeDpi
+    {
+        public static readonly IntPtr DpiAwarenessContextSystemAware = new IntPtr(-2);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetProcessDpiAwarenessContext(IntPtr dpiContext);
+
+        [DllImport("shcore.dll")]
+        public static extern int SetProcessDpiAwareness(int awareness);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetProcessDPIAware();
+    }
+}
+"@ -ErrorAction Stop
+    }
+
+    try {
+        if ([HermesHelper.NativeDpi]::SetProcessDpiAwarenessContext([HermesHelper.NativeDpi]::DpiAwarenessContextSystemAware)) {
+            return
+        }
+    }
+    catch {
+    }
+
+    try {
+        [void][HermesHelper.NativeDpi]::SetProcessDpiAwareness(1)
+        return
+    }
+    catch {
+    }
+
+    try {
+        [void][HermesHelper.NativeDpi]::SetProcessDPIAware()
+    }
+    catch {
+    }
+}
+
 function ConvertTo-PowerShellSingleQuotedLiteral {
     param([AllowNull()][string]$Value)
 
@@ -1059,11 +1107,18 @@ function Get-HermesTrayIcon {
     return [System.Drawing.SystemIcons]::Application
 }
 
+function Get-HermesMenuFont {
+    return New-Object System.Drawing.Font("Microsoft YaHei UI", 9)
+}
+
 function Initialize-HermesTray {
+    Enable-HermesDpiAwareness
+
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
 
     [System.Windows.Forms.Application]::EnableVisualStyles()
+    [System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
 
     $actions = Load-HermesActions
     $health = Test-HermesHealth
@@ -1082,9 +1137,10 @@ function Initialize-HermesTray {
     }
 
     $menu = New-Object System.Windows.Forms.ContextMenuStrip
+    $menu.Font = Get-HermesMenuFont
 
     $statusItem = New-Object System.Windows.Forms.ToolStripMenuItem
-    $statusItem.Text = Get-ShortText -Text ("状态: " + $health.Summary) -MaxLength 80
+    $statusItem.Text = Get-ShortText -Text $health.Summary -MaxLength 80
     $statusItem.Enabled = $false
     [void]$menu.Items.Add($statusItem)
     [void]$menu.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))
