@@ -26,26 +26,6 @@
     ]
   },
   {
-    "label": "选择模型",
-    "command": "hermes model",
-    "requiresInput": false
-  },
-  {
-    "label": "配置工具",
-    "command": "hermes tools",
-    "requiresInput": false
-  },
-  {
-    "label": "诊断",
-    "command": "hermes doctor",
-    "requiresInput": false
-  },
-  {
-    "label": "查看日志",
-    "command": "hermes logs -f",
-    "requiresInput": false
-  },
-  {
     "label": "Gateway",
     "type": "group",
     "module": "gateway",
@@ -79,5 +59,25 @@
         "executionMode": "silentMessage"
       }
     ]
+  },
+  {
+    "label": "选择模型",
+    "command": "hermes model",
+    "requiresInput": false
+  },
+  {
+    "label": "配置工具",
+    "command": "hermes tools",
+    "requiresInput": false
+  },
+  {
+    "label": "诊断",
+    "command": "hermes doctor",
+    "requiresInput": false
+  },
+  {
+    "label": "查看日志",
+    "command": "hermes logs -f",
+    "requiresInput": false
   }
 ]
