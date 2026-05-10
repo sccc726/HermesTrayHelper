@@ -1,0 +1,83 @@
+[
+  {
+    "label": "启动 Hermes",
+    "type": "group",
+    "children": [
+      {
+        "label": "全新启动 Hermes",
+        "command": "hermes",
+        "requiresInput": false
+      },
+      {
+        "label": "继续最近会话",
+        "command": "hermes -c",
+        "requiresInput": false,
+        "executionMode": "continueSession",
+        "fallbackCommand": "hermes sessions browse"
+      },
+      {
+        "label": "浏览会话",
+        "type": "group",
+        "module": "sessions",
+        "limit": 10,
+        "source": "cli",
+        "fallbackCommand": "hermes sessions browse"
+      }
+    ]
+  },
+  {
+    "label": "选择模型",
+    "command": "hermes model",
+    "requiresInput": false
+  },
+  {
+    "label": "配置工具",
+    "command": "hermes tools",
+    "requiresInput": false
+  },
+  {
+    "label": "诊断",
+    "command": "hermes doctor",
+    "requiresInput": false
+  },
+  {
+    "label": "查看日志",
+    "command": "hermes logs -f",
+    "requiresInput": false
+  },
+  {
+    "label": "Gateway",
+    "type": "group",
+    "module": "gateway",
+    "children": [
+      {
+        "label": "启动 Gateway",
+        "command": "hermes gateway start",
+        "requiresInput": false,
+        "gatewayAction": "start",
+        "executionMode": "silentMessage"
+      },
+      {
+        "label": "重启 Gateway",
+        "command": "hermes gateway restart",
+        "requiresInput": false,
+        "gatewayAction": "restart",
+        "executionMode": "silentMessage"
+      },
+      {
+        "label": "Gateway 状态",
+        "command": "hermes gateway status",
+        "requiresInput": false,
+        "gatewayAction": "status",
+        "executionMode": "statusDialog"
+      },
+      {
+        "label": "关闭 Gateway",
+        "command": "hermes gateway stop",
+        "requiresInput": false,
+        "gatewayAction": "stop",
+        "executionMode": "silentMessage"
+      }
+    ]
+  }
+]
