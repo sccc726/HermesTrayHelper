@@ -5,6 +5,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $script:WslDistro = "Ubuntu"
+$script:WslWorkingDirectory = "~"
 $script:ActionsPath = Join-Path $PSScriptRoot "actions.json"
 $script:TrayIconPath = Join-Path $PSScriptRoot "HermesTrayHelper.ico"
 
@@ -241,7 +242,7 @@ function Invoke-WslTextCommand {
     $exitCode = 1
 
     try {
-        $output = & wsl.exe -d $script:WslDistro -e bash -lc $Command 2>&1
+        $output = & wsl.exe -d $script:WslDistro --cd $script:WslWorkingDirectory -e bash -lc $Command 2>&1
         $exitCode = $LASTEXITCODE
     }
     catch {
@@ -554,15 +555,17 @@ function Start-HermesWslTerminal {
 
     $titleLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value ("Hermes Helper - " + $DisplayName)
     $distroLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value $script:WslDistro
+    $workingDirectoryLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value $script:WslWorkingDirectory
     $commandLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value $Command
 
     $launcher = @"
 `$Host.UI.RawUI.WindowTitle = $titleLiteral
 Write-Host 'Hermes Helper'
 Write-Host ('WSL:     ' + $distroLiteral)
+Write-Host ('Workdir: ' + $workingDirectoryLiteral)
 Write-Host ('Command: ' + $commandLiteral)
 Write-Host ''
-& wsl.exe -d $distroLiteral -e bash -lc $commandLiteral
+& wsl.exe -d $distroLiteral --cd $workingDirectoryLiteral -e bash -lc $commandLiteral
 `$exitCode = `$LASTEXITCODE
 Write-Host ''
 Write-Host ('Command exited with code {0}' -f `$exitCode)
@@ -588,6 +591,7 @@ function Start-HermesContinueSessionTerminal {
 
     $titleLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value ("Hermes Helper - " + $DisplayName)
     $distroLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value $script:WslDistro
+    $workingDirectoryLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value $script:WslWorkingDirectory
     $commandLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value $Command
     $fallbackLiteral = ConvertTo-PowerShellSingleQuotedLiteral -Value $FallbackCommand
 
@@ -595,16 +599,17 @@ function Start-HermesContinueSessionTerminal {
 `$Host.UI.RawUI.WindowTitle = $titleLiteral
 Write-Host 'Hermes Helper'
 Write-Host ('WSL:     ' + $distroLiteral)
+Write-Host ('Workdir: ' + $workingDirectoryLiteral)
 Write-Host ('Command: ' + $commandLiteral)
 Write-Host ''
-& wsl.exe -d $distroLiteral -e bash -lc $commandLiteral
+& wsl.exe -d $distroLiteral --cd $workingDirectoryLiteral -e bash -lc $commandLiteral
 `$exitCode = `$LASTEXITCODE
 if (`$exitCode -ne 0) {
     Write-Host ''
     Write-Host 'No previous CLI session found. Opening session browser...'
     Write-Host ('Command: ' + $fallbackLiteral)
     Write-Host ''
-    & wsl.exe -d $distroLiteral -e bash -lc $fallbackLiteral
+    & wsl.exe -d $distroLiteral --cd $workingDirectoryLiteral -e bash -lc $fallbackLiteral
     `$exitCode = `$LASTEXITCODE
 }
 Write-Host ''
